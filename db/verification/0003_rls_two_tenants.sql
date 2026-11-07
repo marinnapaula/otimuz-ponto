@@ -4,18 +4,6 @@
 -- Resultado esperado: 4 linhas PASS, 0 FAIL.
 BEGIN;
 
--- Simular uma sessão de aplicação (role sem privilégios de proprietário).
-SET LOCAL ROLE otimuz_app;
--- Voltar à role proprietária para preparar apenas os dados fictícios.
-RESET ROLE;
-
-CREATE TEMP TABLE _otimuz_rls_result (
- scenario text,
- expected_count integer,
- actual_count integer,
- status text
-) ON COMMIT DROP;
-
 -- IDs determinísticos apenas para este teste transacional.
 INSERT INTO public.tenants (id,legal_name,display_name)
 VALUES
@@ -33,6 +21,13 @@ VALUES
 
 -- A role do banco precisa ser diferente da role proprietária.
 SET LOCAL ROLE otimuz_app;
+CREATE TEMP TABLE _otimuz_rls_result (
+ scenario text,
+ expected_count integer,
+ actual_count integer,
+ status text
+) ON COMMIT DROP;
+
 SELECT set_config('app.user_id','20000000-0000-4000-8000-000000000001',true);
 INSERT INTO _otimuz_rls_result
 SELECT 'A vê somente sua empresa',1,count(*)::integer,
